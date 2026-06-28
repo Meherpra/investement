@@ -27,15 +27,26 @@ export default function GenieFooter() {
           gap: "16px",
         }}
       >
-        <span
-          style={{
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            color: "var(--text-primary)",
-          }}
-        >
-          Built with LangGraph · Gemini · Next.js
-        </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <span
+            style={{
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "var(--text-primary)",
+            }}
+          >
+            Built with LangGraph · Gemini · Groq · Next.js
+          </span>
+          <span
+            style={{
+              fontSize: "0.72rem",
+              color: "var(--text-muted)",
+              fontWeight: 500,
+            }}
+          >
+            Prompts & Flow via Claude · Images by Imagine · UI Recommendations by Google Flow & SkillUI
+          </span>
+        </div>
         <div
           style={{
             display: "flex",
