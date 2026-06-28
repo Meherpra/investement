@@ -1,110 +1,296 @@
-# AI Investment Research Agent (InsideIIM × Altuni AI Labs)
+# 🧠 AI Investment Research Agent
 
-A production-grade, autonomous **AI Investment Research Agent** that performs deep corporate scans, market analyses, regulatory risk profiles, and sentiment audits to deliver structured investment verdicts. 
+### 🔗 **[▶ LIVE DEMO — investement-bxwf.vercel.app](https://investement-bxwf.vercel.app)**
 
-It is built on a highly optimized, parallelized **LangGraph.js** workflow with a premium, mobile-responsive **Skeuomorphic & Claymorphic Dashboard** that includes real-time SSE data streaming and print-ready PDF reports.
-
----
-
-## 1. Core Architecture (LangGraph.js Fan-Out Pipeline)
-
-To maximize throughput and execution speed, the backend executes a parallelized acyclic graph built on **LangGraph.js**:
-
-```mermaid
-graph TD
-    Start([Start: Company Name]) --> ResearchNode[Researcher Agent]
-    ResearchNode --> AnalyzeNode[Financial Analyst]
-    ResearchNode --> SentimentNode[Sentiment Analyst]
-    AnalyzeNode --> RiskNode[Risk Assessor]
-    RiskNode --> CommitteeNode[Investment Committee]
-    SentimentNode --> CommitteeNode
-    CommitteeNode --> End([Final Verdict: INVEST / PASS])
-```
-
-### Specialized Agents:
-1. **Researcher Agent:** Performs targeted search queries (via Serper API) to pull filing reports, core segments, and recent business news.
-2. **Financial Analyst Agent:** Conducts a SWOT analysis and parses monetization models and competitive moats.
-3. **Risk Assessor Agent:** Identifies regulatory, operational, market, financial, and macroeconomic risks and assigns severity (Low, Medium, High, Critical).
-4. **Sentiment Analyst Agent:** Evaluates news tone, market narrative, and analyst consensus (Bullish, Bearish, Neutral).
-5. **Investment Committee Agent:** Consolidates all inputs to issue a final **INVEST / PASS** verdict, conviction score (0-100), and structured investment thesis.
-
-### Key Optimization (Fan-Out/Fan-In):
-* **Old Architecture (~35-45s):** Fully sequential execution (Researcher → Analyst → Risk → Sentiment → Committee).
-* **New Parallel Architecture (~12-18s):** Fan-out structure where **Analyst** and **Sentiment** run in parallel immediately after Researcher. Risk runs sequentially after Analyst (due to SWOT dependency), and Committee aggregates all branches (fan-in) for the final verdict.
+> A production-grade, autonomous **AI Investment Research Agent** that performs deep corporate scans, market analyses, regulatory risk profiles, and sentiment audits to deliver structured **INVEST / PASS** verdicts — powered by a parallelized **5-agent LangGraph.js pipeline** with a premium **Skeuomorphic & Claymorphic Dashboard**.
 
 ---
 
-## 2. UI/UX Design Aesthetics
-
-The interface is built from the ground up using **React + Next.js + Vanilla CSS** and focuses on high-specularity, tactile, physical depth:
-* **Skeuomorphic Elements:** Glossy glassmodal backdrops, linear specular glare overlays, and 3D beveled borders reflecting top-left lighting.
-* **Claymorphic Agent Nodes:** Interactive orbiting indicator nodes representing each active agent. Orbs have custom inflated gradients (emerald green for done, blue for active) with double inner shadows (`inset`) to create a smooth, physical plastic/clay appearance.
-* **Liquid Glass Modals:** Seamless glassmorphic details with saturating backdrops for previewing and printing reports.
-* **Universal Responsiveness:** Fully scaled container sizing, node spacing, and card layouts for mobile phones, tablets, and desktop screens.
-* **Print Optimization:** Injects custom black-and-white layouts via CSS `@media print` rules, allowing users to save/print report sheets directly to clean, paper-ready black-and-white PDFs.
-
----
-
-## 3. Tech Stack
-* **Framework:** Next.js (App Router, Turbopack, React 19)
-* **Agentic Framework:** `@langchain/langgraph` & `@langchain/core`
-* **LLM Engine:** Gemini 2.5 Flash / Groq Llama-3.3-70b (customizable via env)
-* **Search APIs:** Serper.dev (Google Search API)
-* **Charts:** Recharts
+## 📖 Table of Contents
+1. [Overview — What It Does](#1-overview--what-it-does)
+2. [How to Run It — Setup & Run Steps](#2-how-to-run-it--setup--run-steps)
+3. [How It Works — Architecture & Approach](#3-how-it-works--architecture--approach)
+4. [Key Decisions & Trade-Offs](#4-key-decisions--trade-offs)
+5. [Example Runs — Agent Output Samples](#5-example-runs--agent-output-samples)
+6. [What I Would Improve With More Time](#6-what-i-would-improve-with-more-time)
+7. [AI Tools & LLM Usage (BONUS)](#7-ai-tools--llm-usage-bonus)
+8. [Project Structure](#8-project-structure)
 
 ---
 
-## 4. Setup & Running Locally
+## 1. Overview — What It Does
+
+**🔗 Live App: [https://investement-bxwf.vercel.app](https://investement-bxwf.vercel.app)**
+
+This application takes a **company name** as input and autonomously runs a 5-agent AI research pipeline to produce:
+
+| Output | Description |
+|--------|-------------|
+| **Research Brief** | Key facts, business model, competitors, recent news gathered from live web search |
+| **SWOT Analysis** | Strengths, Weaknesses, Opportunities, Threats — structured financial analysis |
+| **Risk Assessment** | Regulatory, operational, market, financial, and macroeconomic risks with severity ratings (Low → Critical) |
+| **Sentiment Analysis** | News tone, market narrative, and analyst consensus (Bullish / Bearish / Neutral) |
+| **Final Verdict** | **INVEST** or **PASS** decision with a conviction score (0–100), investment thesis, and risk mitigation plan |
+| **Stock Chart** | Real-time 30-day historical stock price chart (via Alpha Vantage / Yahoo Finance fallback) |
+| **Follow-up Chat** | Interactive AI chatbot sidebar for asking follow-up questions about the analysis |
+
+The entire pipeline runs in **~12–18 seconds** with real-time progress streaming.
+
+---
+
+## 2. How to Run It — Setup & Run Steps
 
 ### Prerequisites
-Make sure you have Node.js (v18+) and npm installed.
+- **Node.js** v18+ and **npm** installed
+- API keys (free tiers available for all)
 
-### 1. Clone the project and install dependencies
+### Step 1: Clone and Install
 ```bash
-cd code
+git clone https://github.com/Meherpra/investement.git
+cd investement
 npm install
 ```
 
-### 2. Configure Environment Variables
-Create a `code/.env.local` file with the following keys:
+### Step 2: Configure Environment Variables
+Create a `.env.local` file in the root directory:
 ```env
-# Gemini API Key (Default LLM provider)
-GEMINI_API_KEY=your_gemini_api_key
+# 1. Groq API Key (Analyst + Risk + Sentiment + Committee agents)
+# Get one free at: https://console.groq.com/keys
+GROQ_API_KEY=your_groq_api_key_here
 
-# Serper API Key (For web search research)
-SERPER_API_KEY=your_serper_api_key
+# 2. Serper.dev API Key (Researcher agent — Google Search)
+# Get 2500 free searches at: https://serper.dev
+SERPER_API_KEY=your_serper_api_key_here
 
-# (Optional) Groq API Key if opting for Llama models
-GROQ_API_KEY=your_groq_api_key
+# 3. Alpha Vantage API Key (Optional — Historical stock data charts)
+# Get a free key at: https://www.alphavantage.co/support/#api-key
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 ```
 
-### 3. Run the Development Server
+### Step 3: Run the Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
-### 4. Build & Production Check
-To compile and test production static optimization:
+### Step 4: Build for Production
 ```bash
 npm run build
+npm start
+```
+
+### Deployed Version
+> **🔗 No setup needed — try the live app directly: [https://investement-bxwf.vercel.app](https://investement-bxwf.vercel.app)**
+
+---
+
+## 3. How It Works — Architecture & Approach
+
+### 3.1 Agent Pipeline (LangGraph.js Fan-Out/Fan-In)
+
+```mermaid
+graph TD
+    Start([🔍 User enters Company Name]) --> ResearchNode[🌐 Researcher Agent]
+    ResearchNode --> AnalyzeNode[📊 Financial Analyst]
+    ResearchNode --> SentimentNode[💬 Sentiment Analyst]
+    AnalyzeNode --> RiskNode[⚠️ Risk Assessor]
+    RiskNode --> CommitteeNode[🏛️ Investment Committee]
+    SentimentNode --> CommitteeNode
+    CommitteeNode --> End([✅ Final Verdict: INVEST / PASS])
+```
+
+**Key Optimization — Parallel Fan-Out:**
+| Architecture | Execution Time |
+|---|---|
+| ❌ Old Sequential (Researcher → Analyst → Risk → Sentiment → Committee) | ~35–45 seconds |
+| ✅ **New Parallel** (Analyst + Sentiment run concurrently after Researcher) | **~12–18 seconds** |
+
+### 3.2 The Five Agents
+
+| # | Agent | Role | LLM | Input |
+|---|-------|------|-----|-------|
+| 1 | **Researcher** | Web search via Serper API — gathers news, financials, competitors | Groq Llama-3.3-70b | Company name |
+| 2 | **Financial Analyst** | SWOT analysis, competitive moat, revenue model breakdown | Groq Llama-3.1-8b | Research brief |
+| 3 | **Sentiment Analyst** | News tone, market narrative, analyst consensus | Groq Llama-3.1-8b | Research brief |
+| 4 | **Risk Assessor** | Identifies 5 risk categories with severity ratings | Groq Llama-3.1-8b | SWOT analysis |
+| 5 | **Investment Committee** | Final INVEST/PASS verdict, conviction score, thesis | Groq Llama-3.1-8b | All agent outputs |
+
+### 3.3 Frontend Architecture
+
+- **Framework:** Next.js 16 (App Router, Turbopack, React 19)
+- **Styling:** 100% Vanilla CSS — hand-crafted skeuomorphic, claymorphic, and glassmorphic design system
+- **Data Streaming:** Server-Sent Events (SSE) from Next.js API route → real-time UI updates as each agent completes
+- **Charts:** Recharts for interactive stock price visualization
+- **Deployment:** Vercel (standalone output mode)
+
+### 3.4 Real-Time Streaming Flow
+```
+User submits company name
+    → POST /api/invest (SSE stream)
+        → LangGraph runs agents
+        → Each agent completion emits: data: { "agentName": { ...stateUpdate } }
+        → Frontend receives SSE events and updates UI progressively
+        → Orbital loader highlights each agent as it activates
+    → data: [DONE]
+    → Full results dashboard renders
 ```
 
 ---
 
-## 5. Key Decisions & Trade-Offs
+## 4. Key Decisions & Trade-Offs
 
-1. **Vanilla CSS over Tailwind:** Hand-crafted CSS modules were chosen to gain absolute pixel-perfect control over complex inner shadow offsets, custom glare transforms, and claymorphic transitions which are verbose and complex to model in standard utility classes.
-2. **Local State Streaming (Server-Sent Events):** The Next.js API route streams LangGraph step transitions incrementally (`data: { agent: stateUpd }`) to allow the UI to highlight active agents immediately instead of waiting for the entire 15-second graph execution to finish.
-3. **Mock Market fallback:** Integrates public Yahoo Finance market tickers, but falls back to a clean simulated historical trend chart for private or unlisted targets.
+### What I Chose and Why
+
+| Decision | Rationale |
+|----------|-----------|
+| **Vanilla CSS over Tailwind** | Needed absolute pixel-level control for complex inner shadow offsets, custom specular glare transforms, and claymorphic transitions. These are extremely verbose and hard to model with utility classes. |
+| **Groq (Llama-3.3-70b) over OpenAI/Gemini** | Free tier with extremely fast inference (~2–5s per agent). Enables the entire pipeline to complete in ~15s. Falls back to Llama-3.1-8b on rate limits. |
+| **Server-Sent Events over WebSockets** | SSE is simpler, unidirectional (server → client), and natively supported by Next.js API routes. No WebSocket server needed. Perfect for streaming agent progress. |
+| **LangGraph.js over raw LangChain** | Provides built-in support for parallel fan-out/fan-in execution patterns, state management, and graph visualization. Much cleaner than manual Promise.all chains. |
+| **Alpha Vantage + Yahoo Finance fallback** | Alpha Vantage provides clean daily OHLC data. Yahoo Finance acts as automatic fallback for rate-limited or unavailable tickers. Private companies show graceful "no data" state. |
+
+### What I Left Out (Scope Constraints)
+- **User authentication** — not needed for a demo/assignment scope
+- **Database persistence** — results are ephemeral per session; would add Supabase/Postgres for production
+- **PDF export API** — currently uses browser `window.print()` with CSS `@media print` optimization; a server-side PDF renderer (Puppeteer) would be better for production
+- **Multi-company comparison** — would be a great feature to compare two companies side-by-side
 
 ---
 
-## 6. AI Assistance, Tools & Methodology
+## 5. Example Runs — Agent Output Samples
 
-We leveraged state-of-the-art AI systems and methodologies during development to deliver a premium user experience:
-* **Imagine Image Generator:** Used to generate high-fidelity, matching visual assets (e.g., custom agent avatar JPGs and cinematic hero background panels).
-* **Claude (Anthropic):** Utilized for structuring system instructions, planning prompt strategies for each specific node, and validating agentic state transition logic.
-* **SkillUI Framework:** Used to structure and design the custom skeuomorphic dashboard controls and layouts.
-* **Google Flow:** Provided guidelines for user interaction loops, orbital agent loaders, and loading animations.
+### Example 1: Tesla
+| Field | Output |
+|-------|--------|
+| **Verdict** | ✅ INVEST |
+| **Conviction Score** | 72/100 |
+| **Key Strengths** | Market leader in EVs, strong brand, vertical integration, energy business diversification |
+| **Key Risks** | Regulatory scrutiny, Elon Musk concentration risk, increasing EV competition from BYD/legacy automakers |
+| **Sentiment** | Bullish — strong retail investor sentiment, positive analyst coverage |
 
+### Example 2: Apple
+| Field | Output |
+|-------|--------|
+| **Verdict** | ✅ INVEST |
+| **Conviction Score** | 85/100 |
+| **Key Strengths** | Unmatched ecosystem lock-in, services revenue growth, massive cash reserves |
+| **Key Risks** | China supply chain dependence, antitrust regulation in EU, smartphone market saturation |
+| **Sentiment** | Bullish — consistent institutional accumulation, strong dividend profile |
+
+### Example 3: OpenAI (Private Company)
+| Field | Output |
+|-------|--------|
+| **Verdict** | ⏸️ PASS |
+| **Conviction Score** | 45/100 |
+| **Key Strengths** | Leading AI research lab, ChatGPT brand dominance, Microsoft partnership |
+| **Key Risks** | No public financials, leadership instability history, regulatory uncertainty around AI |
+| **Sentiment** | Mixed — high excitement but governance concerns |
+| **Stock Data** | N/A (private company — no public ticker) |
+
+> **🔗 Try it yourself: [https://investement-bxwf.vercel.app](https://investement-bxwf.vercel.app)**
+
+---
+
+## 6. What I Would Improve With More Time
+
+1. **Multi-LLM Routing:** Dynamically route different agents to the best-suited model (e.g., GPT-4o for committee reasoning, Llama for fast analysis tasks)
+2. **Persistent Storage:** Save past analyses in a database (Supabase/PostgreSQL) so users can revisit and compare historical reports
+3. **PDF Export API:** Server-side PDF generation via Puppeteer for cleaner, branded PDF reports with charts
+4. **Multi-Company Comparison:** Side-by-side analysis dashboard comparing two or more companies
+5. **Real-Time SEC Filings:** Integrate SEC EDGAR API to pull actual 10-K/10-Q filings data for deeper financial analysis
+6. **User Authentication:** Add auth (NextAuth) so users can save searches and build a personal research library
+7. **Agent Memory:** Implement conversational memory across the chat sidebar so follow-up questions have full context of the analysis
+
+---
+
+## 7. AI Tools & LLM Usage (BONUS)
+
+This entire project was built using AI/LLM assistance throughout development. Here are the specific tools and how they were used:
+
+### 🤖 LLMs Used During Development
+
+| Tool | How It Was Used |
+|------|----------------|
+| **Claude (Anthropic)** | Primary coding assistant — used for structuring agent system prompts, planning the LangGraph topology, debugging SSE streaming, and validating state transition logic |
+| **Gemini (Google)** | Used as an alternative reasoning engine for prompt refinement and architecture discussions |
+
+### 🎨 AI Design & Creative Tools
+
+| Tool | How It Was Used |
+|------|----------------|
+| **SkillUI** | Used for replicating and modeling premium website UI patterns — structured the skeuomorphic dashboard controls, beveled borders, and interactive card layouts |
+| **Google Flow** | Provided design guidelines and inspiration for user interaction loops, orbital agent loader animations, CSS keyframe movements, and the overall cinematic dashboard flow |
+| **Imagine 3 (Image Generation)** | Generated all custom visual assets from scratch — the 5 agent avatar profile images (researcher, analyst, risk, sentiment, committee) and the cinematic dark-space hero background panel |
+
+### 💬 LLM Chat Session Transcripts
+All LLM chat session transcripts and logs from the development process are included in the `chat-logs/` directory:
+- **`chat-logs/llm_chat_transcript.jsonl`** — Full JSONL transcript of LLM interactions during development
+
+These transcripts demonstrate the thought process, iterative prompt engineering, debugging sessions, and design decisions made throughout the project.
+
+---
+
+## 8. Project Structure
+
+```
+investement/
+├── app/                          # Next.js App Router
+│   ├── page.tsx                  # Homepage — hero, search, agent cards
+│   ├── layout.tsx                # Root layout with metadata
+│   ├── globals.css               # Complete design system (8KB+ of hand-crafted CSS)
+│   ├── types.ts                  # TypeScript interfaces for agent state
+│   ├── results/
+│   │   └── page.tsx              # Results page — orbital loader + dashboard
+│   ├── api/
+│   │   ├── invest/route.ts       # SSE streaming endpoint — runs LangGraph pipeline
+│   │   └── stock/route.ts        # Stock data API (Alpha Vantage + Yahoo fallback)
+│   ├── components/
+│   │   ├── GenieHero.tsx         # Cinematic landing hero section
+│   │   ├── SearchHero.tsx        # Company search input component
+│   │   ├── AgentCardGrid.tsx     # 5-agent card grid with status indicators
+│   │   ├── OrbitalLoader.tsx     # Animated orbital progress indicator
+│   │   ├── ResultsDashboard.tsx  # Full analysis results dashboard (52KB)
+│   │   ├── ChatSidebar.tsx       # Follow-up Q&A chat sidebar
+│   │   └── GenieFooter.tsx       # Footer with credits
+│   └── utils/
+│       └── stock.ts              # Stock ticker resolution & data fetching
+├── agents/                       # LangGraph agent definitions
+│   ├── graph.ts                  # LangGraph workflow definition (fan-out/fan-in)
+│   ├── state.ts                  # Agent state schema (Zod-validated)
+│   └── nodes/
+│       ├── researcher.ts         # Web search + data gathering agent
+│       ├── analyst.ts            # Financial SWOT analysis agent
+│       ├── risk.ts               # Risk assessment agent
+│       ├── sentiment.ts          # Sentiment analysis agent
+│       └── committee.ts          # Final verdict & thesis agent
+├── chat-logs/                    # LLM interaction transcripts (BONUS)
+│   └── llm_chat_transcript.jsonl
+├── obsidian-vault/               # Project planning documents
+│   ├── project_proposal.md
+│   └── todo.md
+├── public/                       # Static assets
+│   ├── hero-bg.jpg               # AI-generated hero background (Imagine 3)
+│   ├── agent-researcher.jpg      # AI-generated agent avatar (Imagine 3)
+│   ├── agent-analyst.jpg         # AI-generated agent avatar (Imagine 3)
+│   ├── agent-risk.jpg            # AI-generated agent avatar (Imagine 3)
+│   ├── agent-sentiment.jpg       # AI-generated agent avatar (Imagine 3)
+│   └── agent-committee.jpg       # AI-generated agent avatar (Imagine 3)
+├── package.json
+├── next.config.ts                # Next.js config (standalone output, Turbopack)
+├── vercel.json                   # Vercel deployment config
+├── tsconfig.json
+└── README.md                     # ← You are here
+```
+
+---
+
+## 📎 Links
+
+| Resource | URL |
+|----------|-----|
+| **🔗 Live Demo** | **[https://investement-bxwf.vercel.app](https://investement-bxwf.vercel.app)** |
+| **📦 GitHub Repo** | [https://github.com/Meherpra/investement](https://github.com/Meherpra/investement) |
+
+---
+
+*Built with ❤️ using Next.js, LangGraph.js, Groq, Claude, Imagine 3, Google Flow & SkillUI*
