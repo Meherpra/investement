@@ -1,23 +1,25 @@
 # dependencies
-code/node_modules/
-code/.pnp
-code/.pnp.*
-code/.yarn/*
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
 
 # next.js build output
-code/.next/
-code/out/
-code/build/
-code/*.tsbuildinfo
-code/next-env.d.ts
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
 
 # env files
-code/.env.local
-code/.env.production
-code/.env.development
-code/.env
+.env.local
+.env.production
+.env.development
+.env
+.env*.local
 
 # misc
-code/npm-debug.log*
+npm-debug.log*
 repomix-output.xml
 genie-design/
+submission.zip
