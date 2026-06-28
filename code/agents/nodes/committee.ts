@@ -1,7 +1,7 @@
 import { AgentState } from "../state";
 import { ChatGroq } from "@langchain/groq";
 
-const FALLBACK_MODEL = "gemma2-9b-it";
+const FALLBACK_MODEL = "llama-3.3-70b-versatile";
 
 /**
  * Agent 5 — Investment Committee
@@ -69,12 +69,12 @@ You MUST respond with ONLY a valid JSON object in this exact format (no markdown
   } catch (e: unknown) {
     const errMsg = e instanceof Error ? e.message : String(e);
     if (errMsg.includes("429") || errMsg.includes("rate_limit")) {
-      console.warn("[COMMITTEE] Rate limited on mixtral, falling back to", FALLBACK_MODEL);
+      console.warn("[COMMITTEE] Rate limited on llama-3.1-8b-instant, falling back to", FALLBACK_MODEL);
       const fallback = new ChatGroq({
         model: FALLBACK_MODEL,
         temperature: 0.1,
         apiKey: process.env.GROQ_API_KEY,
-        maxRetries: 3,
+        maxRetries: 2,
       });
       response = await fallback.invoke(prompt);
     } else {

@@ -52,13 +52,13 @@ Write in professional markdown. Be concise. Max 250 words total.`;
   } catch (e: unknown) {
     const errMsg = e instanceof Error ? e.message : String(e);
     if (errMsg.includes("429") || errMsg.includes("rate_limit")) {
-      console.warn("[RISK] Rate limited, falling back to gemma2-9b-it");
+      console.warn("[RISK] Rate limited on llama-3.1-8b-instant, falling back to llama-3.3-70b-versatile");
       try {
         const fallback = new ChatGroq({
-          model: "gemma2-9b-it",
+          model: "llama-3.3-70b-versatile",
           temperature: 0.15,
           apiKey: process.env.GROQ_API_KEY,
-          maxRetries: 3,
+          maxRetries: 2,
         });
         response = await fallback.invoke(prompt);
       } catch (fallbackErr) {
