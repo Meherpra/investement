@@ -106,7 +106,12 @@ function ResultsContent() {
               break;
             }
             try {
-              const parsed     = JSON.parse(dataStr);
+              const parsed = JSON.parse(dataStr);
+              if (parsed.error) {
+                setErrorMsg(parsed.error);
+                setAppState("error");
+                break;
+              }
               const nodeName   = Object.keys(parsed)[0];
               const stateUpd   = parsed[nodeName];
               setAgentState((prev) => ({ ...prev, ...stateUpd }));
@@ -159,10 +164,9 @@ function ResultsContent() {
       {/* ── OrbitalLoader — always visible ── */}
       {appState !== "error" && (
         <OrbitalLoader
-          currentStep={appState === "complete" ? "done" : currentStep}
+          agentState={agentState}
+          appState={appState}
           companyName={company}
-          finalVerdict={agentState.finalVerdict as "INVEST" | "PASS" | undefined}
-          convictionScore={agentState.convictionScore}
         />
       )}
 

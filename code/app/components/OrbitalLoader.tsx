@@ -5,9 +5,8 @@ import { Search, TrendingUp, ShieldAlert, MessageSquare, Heart } from "lucide-re
 import { AgentStep } from "./AgentCardGrid";
 
 interface OrbitalLoaderProps {
-  currentStep: AgentStep | "done";
-  finalVerdict?: "INVEST" | "PASS";
-  convictionScore?: number;
+  agentState: any;
+  appState: string;
   companyName: string;
 }
 
@@ -45,26 +44,33 @@ function toRad(deg: number) {
   return (deg * Math.PI) / 180;
 }
 
-function getStatus(step: AgentStep, current: AgentStep | "done"): "IDLE" | "RUNNING" | "COMPLETE" {
-  if (current === "done") return "COMPLETE";
-  
-  // Custom execution topology
-  if (current === "researcher") {
-    return step === "researcher" ? "RUNNING" : "IDLE";
+function getStatus(step: AgentStep, agentState: any, appState: string): "IDLE" | "RUNNING" | "COMPLETE" {
+  if (appState === "complete") return "COMPLETE";
+  if (appState === "error") return "IDLE";
+
+  if (step === "researcher") {
+    if (agentState.researchData) return "COMPLETE";
+    return "RUNNING";
   }
-  if (current === "analyst" || current === "sentiment") {
-    if (step === "researcher") return "COMPLETE";
-    if (step === "analyst" || step === "sentiment") return "RUNNING";
+  if (step === "analyst") {
+    if (agentState.swotAnalysis) return "COMPLETE";
+    if (agentState.researchData) return "RUNNING";
     return "IDLE";
   }
-  if (current === "risk") {
-    if (step === "researcher" || step === "analyst" || step === "sentiment") return "COMPLETE";
-    if (step === "risk") return "RUNNING";
+  if (step === "sentiment") {
+    if (agentState.sentimentAnalysis) return "COMPLETE";
+    if (agentState.researchData) return "RUNNING";
     return "IDLE";
   }
-  if (current === "committee") {
-    if (step === "committee") return "RUNNING";
-    return "COMPLETE";
+  if (step === "risk") {
+    if (agentState.riskAssessment) return "COMPLETE";
+    if (agentState.swotAnalysis) return "RUNNING";
+    return "IDLE";
+  }
+  if (step === "committee") {
+    if (agentState.finalVerdict && agentState.finalVerdict !== "PENDING") return "COMPLETE";
+    if (agentState.riskAssessment && agentState.sentimentAnalysis) return "RUNNING";
+    return "IDLE";
   }
   return "IDLE";
 }
@@ -75,13 +81,15 @@ function buildPath(id: string, sx: number, sy: number, ex: number, ey: number, R
 }
 
 export default function OrbitalLoader({
-  currentStep, finalVerdict, convictionScore, companyName,
+  agentState, appState, companyName,
 }: OrbitalLoaderProps) {
   const [w, setW] = useState(1200);
 
-  const statuses       = AGENT_DEFS.map((a) => getStatus(a.step, currentStep));
+  const statuses       = AGENT_DEFS.map((a) => getStatus(a.step, agentState, appState));
   const completedCount = statuses.filter((s) => s === "COMPLETE").length;
   const allComplete    = completedCount === 5;
+  const finalVerdict   = agentState.finalVerdict;
+  const convictionScore = agentState.convictionScore;
   const isInvest       = finalVerdict === "INVEST";
   const verdictColor   = isInvest ? "#10b981" : "#9b6bf3";
 
