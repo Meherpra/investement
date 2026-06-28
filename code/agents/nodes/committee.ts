@@ -94,35 +94,51 @@ You MUST respond with ONLY a valid JSON object in this exact format (no markdown
     content.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1]?.trim() ??
     content.trim();
 
-  let parsed: {
-    verdict: "INVEST" | "PASS";
-    convictionScore: number;
-    thesis: string;
-  };
+  let verdict: "INVEST" | "PASS" = "PASS";
+  let convictionScore = 0;
+  let thesis = "No thesis provided.";
 
   try {
-    parsed = JSON.parse(jsonMatch);
-  } catch {
-    // Last-ditch attempt: find the first { ... } block
+    // Attempt standard JSON parse
+    const parsed = JSON.parse(jsonMatch);
+    verdict = parsed.verdict === "INVEST" ? "INVEST" : "PASS";
+    convictionScore = Math.max(0, Math.min(100, Math.round(Number(parsed.convictionScore) || 0)));
+    thesis = typeof parsed.thesis === "string" ? parsed.thesis : "No thesis provided.";
+  } catch (err) {
+    console.warn("[COMMITTEE] JSON.parse failed, attempting regex extraction:", err);
+    
+    // Fallback 1: Try finding the first JSON block and cleaning up its control characters
     const objectMatch = content.match(/\{[\s\S]*\}/)?.[0];
-    if (!objectMatch) {
-      return {
-        convictionScore: 0,
-        finalVerdict: "PASS",
-        investmentThesis: `Failed to parse verdict JSON. Raw: ${content.slice(0, 300)}`,
-      };
-    }
-    parsed = JSON.parse(objectMatch);
-  }
+    if (objectMatch) {
+      try {
+        // Clean unescaped newlines inside strings by replacing them with space
+        const cleaned = objectMatch.replace(/[\r\n]+/g, " ");
+        const parsed = JSON.parse(cleaned);
+        verdict = parsed.verdict === "INVEST" ? "INVEST" : "PASS";
+        convictionScore = Math.max(0, Math.min(100, Math.round(Number(parsed.convictionScore) || 0)));
+        thesis = typeof parsed.thesis === "string" ? parsed.thesis : "No thesis provided.";
+      } catch (nestedErr) {
+        console.warn("[COMMITTEE] Cleaned JSON parse failed, resorting to pure regex:", nestedErr);
+        
+        // Fallback 2: Pure Regex parsing
+        const vMatch = content.match(/"verdict"\s*:\s*"?(INVEST|PASS)"?/i);
+        if (vMatch) verdict = vMatch[1].toUpperCase() as "INVEST" | "PASS";
 
-  // Validate and sanitize
-  const verdict = parsed.verdict === "INVEST" ? "INVEST" : "PASS";
-  const convictionScore = Math.max(
-    0,
-    Math.min(100, Math.round(Number(parsed.convictionScore) || 0))
-  );
-  const thesis =
-    typeof parsed.thesis === "string" ? parsed.thesis : "No thesis provided.";
+        const sMatch = content.match(/"convictionScore"\s*:\s*(\d+)/);
+        if (sMatch) convictionScore = Math.max(0, Math.min(100, parseInt(sMatch[1], 10)));
+
+        const tMatch = content.match(/"thesis"\s*:\s*"([\s\S]*?)"\s*(?:,|\})/);
+        if (tMatch) {
+          thesis = tMatch[1].trim();
+        } else {
+          const rawThesisMatch = content.match(/"thesis"\s*:\s*"([\s\S]*)/);
+          if (rawThesisMatch) {
+            thesis = rawThesisMatch[1].replace(/["}]\s*$/, "").trim();
+          }
+        }
+      }
+    }
+  }
 
   return {
     convictionScore,
