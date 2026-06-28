@@ -18,13 +18,6 @@ export async function riskAgent(
     };
   }
 
-  const llm = new ChatGroq({
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.15,
-    apiKey: process.env.GROQ_API_KEY,
-    maxRetries: 3,
-  });
-
   const prompt = `You are a Chief Risk Officer at an institutional investment fund.
 
 Based on the research data and SWOT analysis for ${state.companyName}, produce a concise risk assessment.
@@ -47,13 +40,40 @@ ${state.swotAnalysis}
 
 Write in professional markdown. Be concise. Max 250 words total.`;
 
+  let response;
   try {
-    const response = await llm.invoke(prompt);
-    return { riskAssessment: response.content as string };
-  } catch (error) {
-    console.error("[RISK ASSESSOR] Failed:", error);
-    return {
-      riskAssessment: `Failed to generate risk assessment. Error: ${error}`,
-    };
+    const llm = new ChatGroq({
+      model: "llama-3.1-8b-instant",
+      temperature: 0.15,
+      apiKey: process.env.GROQ_API_KEY,
+      maxRetries: 2,
+    });
+    response = await llm.invoke(prompt);
+  } catch (e: unknown) {
+    const errMsg = e instanceof Error ? e.message : String(e);
+    if (errMsg.includes("429") || errMsg.includes("rate_limit")) {
+      console.warn("[RISK] Rate limited, falling back to gemma2-9b-it");
+      try {
+        const fallback = new ChatGroq({
+          model: "gemma2-9b-it",
+          temperature: 0.15,
+          apiKey: process.env.GROQ_API_KEY,
+          maxRetries: 3,
+        });
+        response = await fallback.invoke(prompt);
+      } catch (fallbackErr) {
+        console.error("[RISK] Fallback failed:", fallbackErr);
+        return {
+          riskAssessment: `Failed to generate risk assessment. Fallback error: ${fallbackErr}`,
+        };
+      }
+    } else {
+      console.error("[RISK] Failed:", e);
+      return {
+        riskAssessment: `Failed to generate risk assessment. Error: ${e}`,
+      };
+    }
   }
+
+  return { riskAssessment: response.content as string };
 }
