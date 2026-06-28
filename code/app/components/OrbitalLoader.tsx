@@ -77,7 +77,21 @@ function getStatus(step: AgentStep, agentState: any, appState: string): "IDLE" |
 
 // Draw smooth Bezier curves to the center orb
 function buildPath(id: string, sx: number, sy: number, ex: number, ey: number, R: number): string {
-  return `M ${sx} ${sy} C ${(sx + ex) / 2} ${(sy + ey) / 2}, ${(sx + ex) / 2} ${(sy + ey) / 2}, ${ex} ${ey}`;
+  const dx = sx - ex;
+  const dy = sy - ey;
+  const angle = Math.atan2(dy, dx);
+
+  // Tangential offset to create a beautiful vortex/spiral curve into the center
+  const strength = R * 0.5; // Amount of curve bend
+  const tx = -Math.sin(angle) * strength;
+  const ty = Math.cos(angle) * strength;
+
+  const cp1x = sx + tx;
+  const cp1y = sy + ty;
+  const cp2x = ex + tx * 0.4;
+  const cp2y = ey + ty * 0.4;
+
+  return `M ${sx} ${sy} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${ex} ${ey}`;
 }
 
 export default function OrbitalLoader({
