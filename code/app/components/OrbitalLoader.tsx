@@ -235,7 +235,7 @@ export default function OrbitalLoader({
               </feMerge>
             </filter>
             {/* Mask: punch out circles at nodes and center orb so lines stop at edges */}
-            <mask id="lineMask">
+            <mask id="lineMask" maskUnits="userSpaceOnUse">
               <rect width="100%" height="100%" fill="white" />
               <circle cx={cx} cy={cy} r={orbR + 2} fill="black" />
               {agentPos.map((p, i) => (
