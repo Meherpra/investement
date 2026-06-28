@@ -57,3 +57,12 @@ We will build a high-fidelity dashboard that feels cinematic and deeply immersiv
 * **Verdict Banner:** A striking header showing the final **INVEST / PASS** decision with matching visual styles (Emerald green glow for Invest, Crimson red glow for Pass).
 * **Metrics & Analytics widgets:** Data cards for SWOT, financials, and moat analysis.
 * **Interactive Chat / Q&A:** A sidebar allowing users to ask follow-up questions about the decision (e.g., *"Why did you flag regulatory risks?"*).
+
+---
+
+## 4. Design Tools & AI Collaboration
+We integrated specific tools and design frameworks to polish the workflow:
+* **Imagine:** Image generation for all the agent-specific profile illustrations and the dark space-textured background panel.
+* **Claude:** Used for formulating core agent prompts, instructions, and topological graph planning.
+* **SkillUI:** Utilized for modeling beveled borders, shadows, and interactive dashboard states.
+* **Google Flow:** Recommendations for implementing clean CSS keyframe movements and the orbiting indicator flows.

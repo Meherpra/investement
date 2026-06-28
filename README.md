@@ -97,3 +97,14 @@ npm run build
 1. **Vanilla CSS over Tailwind:** Hand-crafted CSS modules were chosen to gain absolute pixel-perfect control over complex inner shadow offsets, custom glare transforms, and claymorphic transitions which are verbose and complex to model in standard utility classes.
 2. **Local State Streaming (Server-Sent Events):** The Next.js API route streams LangGraph step transitions incrementally (`data: { agent: stateUpd }`) to allow the UI to highlight active agents immediately instead of waiting for the entire 15-second graph execution to finish.
 3. **Mock Market fallback:** Integrates public Yahoo Finance market tickers, but falls back to a clean simulated historical trend chart for private or unlisted targets.
+
+---
+
+## 6. AI Assistance, Tools & Methodology
+
+We leveraged state-of-the-art AI systems and methodologies during development to deliver a premium user experience:
+* **Imagine Image Generator:** Used to generate high-fidelity, matching visual assets (e.g., custom agent avatar JPGs and cinematic hero background panels).
+* **Claude (Anthropic):** Utilized for structuring system instructions, planning prompt strategies for each specific node, and validating agentic state transition logic.
+* **SkillUI Framework:** Used to structure and design the custom skeuomorphic dashboard controls and layouts.
+* **Google Flow:** Provided guidelines for user interaction loops, orbital agent loaders, and loading animations.
+
