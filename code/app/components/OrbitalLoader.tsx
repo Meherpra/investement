@@ -227,7 +227,7 @@ export default function OrbitalLoader({
         >
           <defs>
             {/* Glow — very subtle, not neon */}
-            <filter id="pathGlow" x="-10%" y="-10%" width="120%" height="120%">
+            <filter id="pathGlow" filterUnits="userSpaceOnUse">
               <feGaussianBlur stdDeviation="1.5" result="b" />
               <feMerge>
                 <feMergeNode in="b" />
