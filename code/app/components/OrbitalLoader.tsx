@@ -98,10 +98,10 @@ export default function OrbitalLoader({
     if (typeof window === "undefined") return;
     const measure = () => {
       const container = document.getElementById("orbital-container");
-      if (container) {
+      if (container && container.clientWidth > 200) {
         setW(container.clientWidth);
       } else {
-        setW(window.innerWidth);
+        setW(window.innerWidth || 1200);
       }
     };
     measure();
@@ -146,7 +146,8 @@ export default function OrbitalLoader({
           to   { opacity: 1; transform: scale(1); }
         }
         @keyframes orbRotate {
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
         @keyframes subtlePulse {
           0%, 100% { opacity: 1; }
