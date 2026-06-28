@@ -120,46 +120,9 @@ export default function OrbitalLoader({
   });
 
   // ── Path d-strings ─────────────────────────────────────────────────────
-  const buildNodeToNodePath = (sx: number, sy: number, ex: number, ey: number, pull = 0.8) => {
-    const mx = (sx + ex) / 2;
-    const my = (sy + ey) / 2;
-    const cpx = cx + (mx - cx) * pull;
-    const cpy = cy + (my - cy) * pull;
-    return `M ${sx} ${sy} Q ${cpx} ${cpy} ${ex} ${ey}`;
-  };
-
-  const PATH_DEFS = [
-    {
-      id: "researcher-to-analyst",
-      d: buildNodeToNodePath(agentPos[0].x, agentPos[0].y, agentPos[1].x, agentPos[1].y, 0.85),
-      status: statuses[0],
-    },
-    {
-      id: "researcher-to-sentiment",
-      d: buildNodeToNodePath(agentPos[0].x, agentPos[0].y, agentPos[3].x, agentPos[3].y, 0.85),
-      status: statuses[0],
-    },
-    {
-      id: "analyst-to-risk",
-      d: buildNodeToNodePath(agentPos[1].x, agentPos[1].y, agentPos[2].x, agentPos[2].y, 0.85),
-      status: statuses[1],
-    },
-    {
-      id: "risk-to-committee",
-      d: buildNodeToNodePath(agentPos[2].x, agentPos[2].y, agentPos[4].x, agentPos[4].y, 0.85),
-      status: statuses[2],
-    },
-    {
-      id: "sentiment-to-committee",
-      d: buildNodeToNodePath(agentPos[3].x, agentPos[3].y, agentPos[4].x, agentPos[4].y, 0.85),
-      status: statuses[3],
-    },
-    {
-      id: "committee-to-center",
-      d: buildPath("committee", agentPos[4].x, agentPos[4].y, cx, cy, orbitR),
-      status: statuses[4],
-    },
-  ];
+  const paths = AGENT_DEFS.map((a, i) =>
+    buildPath(a.id, agentPos[i].x, agentPos[i].y, cx, cy, orbitR)
+  );
 
   return (
     <div style={{ width: "100%", paddingBottom: "12px" }}>
@@ -272,9 +235,9 @@ export default function OrbitalLoader({
             </mask>
           </defs>
 
-          {PATH_DEFS.map((p) => {
-            const d      = p.d;
-            const status = p.status;
+          {AGENT_DEFS.map((a, idx) => {
+            const d      = paths[idx];
+            const status = statuses[idx];
 
             const isDone = status === "COMPLETE";
             const lineColor = isDone
@@ -292,7 +255,7 @@ export default function OrbitalLoader({
               : "stroke 0.6s ease";
 
             return (
-              <g key={p.id} mask="url(#lineMask)">
+              <g key={a.id} mask="url(#lineMask)">
                 {/* Base faint track — always visible */}
                 <path d={d} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1.5" strokeLinecap="round" />
 
